@@ -1,7 +1,7 @@
 ARG ALPINE_VERSION=3.14
 ARG GO_VERSION=1.17.1
 ARG GRPC_VERSION=1.41.0
-ARG PHP_GRPC_VERSION=1.5.0
+ARG PHP_GRPC_VERSION=2.5.0-beta.2
 ARG PROTOC_GEN_DOC_VERSION=1.5.0
 ARG PROTOC_GEN_FIELDMASK_VERSION=0.4.5
 ARG PROTOC_GEN_GO_VERSION=1.5.2
@@ -105,11 +105,11 @@ RUN mkdir -p ${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway && \
 
 # protoc-gen-php-grpc
 ARG PHP_GRPC_VERSION
-RUN mkdir -p ${GOPATH}/src/github.com/spiral/php-grpc && \
-    curl -sSL https://api.github.com/repos/spiral/php-grpc/tarball/v${PHP_GRPC_VERSION} | tar xz --strip 1 -C ${GOPATH}/src/github.com/spiral/php-grpc && \
-    cd ${GOPATH}/src/github.com/spiral/php-grpc && \
-    go get -t ./cmd/protoc-gen-php-grpc && \
-    go build -ldflags '-w -s' -o /php-grpc-out/protoc-gen-php-grpc ./cmd/protoc-gen-php-grpc && \
+RUN mkdir -p ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
+    curl -sSL https://api.github.com/repos/spiral/roadrunner-plugins/tarball/v${PHP_GRPC_VERSION} | tar xz --strip 1 -C ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
+    cd ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
+    go get -t ./grpc/protoc_plugins/protoc-gen-php-grpc && \
+    go build -ldflags '-w -s' -o /php-grpc-out/protoc-gen-php-grpc ./grpc/protoc_plugins/protoc-gen-php-grpc && \
     install -Ds /php-grpc-out/protoc-gen-php-grpc /out/usr/bin/protoc-gen-php-grpc
 
 # googleapis proto

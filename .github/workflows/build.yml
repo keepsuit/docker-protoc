@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - v1
+      - v2
 
 jobs:
 
@@ -44,9 +44,8 @@ jobs:
           cache-from: |
             type=local,src=/tmp/.buildx-cache
             keepsuit/protoc:latest
-            keepsuit/protoc:v1
+            keepsuit/protoc:v2
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=all
           push: true
           tags: |
-            keepsuit/protoc:v1
-            keepsuit/protoc:latest
+            keepsuit/protoc:v2

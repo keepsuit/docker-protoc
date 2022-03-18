@@ -1,15 +1,15 @@
 ARG ALPINE_VERSION=3.15
-ARG GO_VERSION=1.17.4
-ARG GRPC_VERSION=1.42.0
-ARG PHP_GRPC_VERSION=2.6.4
-ARG PROTOC_GEN_DOC_VERSION=1.5.0
+ARG GO_VERSION=1.17.8
+ARG GRPC_VERSION=1.44.0
+ARG PHP_GRPC_VERSION=2.11.3
+ARG PROTOC_GEN_DOC_VERSION=1.5.1
 ARG PROTOC_GEN_FIELDMASK_VERSION=0.5.0
 ARG PROTOC_GEN_GO_VERSION=1.5.2
 ARG PROTOC_GEN_GOGO_VERSION=1.3.2
 ARG PROTOC_GEN_GOGOTTN_VERSION=3.0.14
-ARG PROTOC_GEN_VALIDATE_VERSION=0.6.2
-ARG GRPC_GATEWAY_VERSION=2.7.1
-ARG GOOGLE_API_VERSION=f79d6e85a9a6b913a5e9cb0067e846e7f087dbc8
+ARG PROTOC_GEN_VALIDATE_VERSION=0.6.7
+ARG GRPC_GATEWAY_VERSION=2.9.0
+ARG GOOGLE_API_VERSION=1605e8dce658216753415d1a1bb0ee6f8dc30c1b
 ARG UPX_VERSION=3.96
 
 
@@ -105,11 +105,11 @@ RUN mkdir -p ${GOPATH}/src/github.com/grpc-ecosystem/grpc-gateway && \
 
 # protoc-gen-php-grpc
 ARG PHP_GRPC_VERSION
-RUN mkdir -p ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
-    curl -sSL https://api.github.com/repos/spiral/roadrunner-plugins/tarball/v${PHP_GRPC_VERSION} | tar xz --strip 1 -C ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
-    cd ${GOPATH}/src/github.com/spiral/roadrunner-plugins && \
-    go get -t ./grpc/protoc_plugins/protoc-gen-php-grpc && \
-    go build -ldflags '-w -s' -o /php-grpc-out/protoc-gen-php-grpc ./grpc/protoc_plugins/protoc-gen-php-grpc && \
+RUN mkdir -p ${GOPATH}/src/github.com/roadrunner-server/grpc && \
+    curl -sSL https://api.github.com/repos/roadrunner-server/grpc/tarball/v${PHP_GRPC_VERSION} | tar xz --strip 1 -C ${GOPATH}/src/github.com/roadrunner-server/grpc && \
+    cd ${GOPATH}/src/github.com/roadrunner-server/grpc && \
+    go mod download && \
+    go build -trimpath -ldflags "-s" -o "/php-grpc-out/protoc-gen-php-grpc" protoc_plugins/protoc-gen-php-grpc/main.go && \
     install -Ds /php-grpc-out/protoc-gen-php-grpc /out/usr/bin/protoc-gen-php-grpc
 
 # googleapis proto

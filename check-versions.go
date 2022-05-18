@@ -48,16 +48,14 @@ func main() {
 		{"grpc", "grpc"},
 		{"roadrunner-server", "grpc"},
 		{"pseudomuto", "protoc-gen-doc"},
-		// {"TheThingsIndustries", "protoc-gen-fieldmask"},
 		{"golang", "protobuf"},
 		{"gogo", "protobuf"},
-		// {"TheThingsIndustries", "protoc-gen-gogottn"},
 		{"envoyproxy", "protoc-gen-validate"},
 		{"grpc-ecosystem", "grpc-gateway"},
 		{"upx", "upx"},
 		// {"mwitkow", "go-proto-validators"},
 		// {"ckaznocha", "protoc-gen-lint"},
-		//{"grpc", "grpc-go"},
+		// {"grpc", "grpc-go"},
 	} {
 		tag := "n/a"
 		url := "n/a"

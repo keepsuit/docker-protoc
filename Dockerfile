@@ -1,17 +1,16 @@
 # syntax=docker/dockerfile:1.4
 
-ARG ALPINE_VERSION=3.15
-ARG GO_VERSION=1.18.0
-ARG NODE_VERSION=16.15.0
-ARG GRPC_VERSION=1.46.2
-ARG PHP_GRPC_VERSION=2.14.1
+ARG ALPINE_VERSION=3.16
+ARG GO_VERSION=1.18.3
+ARG NODE_VERSION=16
+ARG PROTOBUF_VERSION=21.2
 ARG PROTOC_GEN_DOC_VERSION=1.5.1
 ARG PROTOC_GEN_GO_VERSION=1.28.0
 ARG PROTOC_GEN_GO_GRPC_VERSION=1.45.0
 ARG PROTOC_GEN_GOGO_VERSION=1.3.2
 ARG PROTOC_GEN_VALIDATE_VERSION=0.6.7
 ARG PROTOC_GEN_TS_VERSION=0.15.0
-ARG GRPC_GATEWAY_VERSION=2.10.0
+ARG GRPC_GATEWAY_VERSION=2.10.3
 ARG GRPC_WEB_VERSION=1.3.1
 ARG GOOGLE_API_VERSION=134d8be4b58b2bfc373374f71ec52a0df59af664
 ARG UPX_VERSION=3.96
@@ -36,6 +35,7 @@ RUN mkdir -p /out
 RUN apk add --no-cache \
     curl \
     unzip
+
 
 # protoc-gen-gateway
 FROM --platform=$BUILDPLATFORM go_host as grpc_gateway
@@ -83,6 +83,7 @@ RUN go build -ldflags '-w -s' -o /golang-protobuf-out/protoc-gen-go-grpc .
 RUN install -D /golang-protobuf-out/protoc-gen-go-grpc /out/usr/bin/protoc-gen-go-grpc
 RUN xx-verify /out/usr/bin/protoc-gen-go-grpc
 
+
 # protoc-gen-go
 FROM --platform=$BUILDPLATFORM go_host as protoc_gen_go
 RUN mkdir -p ${GOPATH}/src/google.golang.org/protobuf
@@ -95,6 +96,7 @@ RUN xx-go --wrap
 RUN go build -ldflags '-w -s' -o /golang-protobuf-out/protoc-gen-go ./cmd/protoc-gen-go
 RUN install -D /golang-protobuf-out/protoc-gen-go /out/usr/bin/protoc-gen-go
 RUN xx-verify /out/usr/bin/protoc-gen-go
+
 
 # protoc-gen-gogo
 FROM --platform=$BUILDPLATFORM go_host as protoc_gen_gogo
@@ -118,6 +120,7 @@ RUN install -D $(find ./protobuf/google/protobuf -name '*.proto') -t /out/usr/in
 RUN install -D ./gogoproto/gogo.proto /out/usr/include/github.com/gogo/protobuf/gogoproto/gogo.proto
 RUN xx-verify /out/usr/bin/protoc-gen-gogo
 
+
 # protoc-gen-validate
 FROM --platform=$BUILDPLATFORM go_host as protoc_gen_validate
 ARG PROTOC_GEN_VALIDATE_VERSION
@@ -132,6 +135,7 @@ RUN install -D /protoc-gen-validate-out/protoc-gen-validate /out/usr/bin/protoc-
 RUN install -D ./validate/validate.proto /out/usr/include/github.com/envoyproxy/protoc-gen-validate/validate/validate.proto
 RUN xx-verify /out/usr/bin/protoc-gen-validate
 
+
 # protoc-gen-php-grpc
 FROM --platform=$BUILDPLATFORM go_host as protoc_gen_php_grpc
 ARG PHP_GRPC_VERSION
@@ -144,6 +148,7 @@ RUN xx-go --wrap
 RUN go build -trimpath -ldflags "-s" -o /php-grpc-out/protoc-gen-php-grpc protoc_plugins/protoc-gen-php-grpc/main.go
 RUN install -D /php-grpc-out/protoc-gen-php-grpc /out/usr/bin/protoc-gen-php-grpc
 RUN xx-verify /out/usr/bin/protoc-gen-php-grpc
+
 
 # protoc-gen-grpc-web
 FROM alpine:${ALPINE_VERSION} as grpc_web
@@ -174,6 +179,7 @@ RUN install -D ./google/api/httpbody.proto /out/usr/include/google/api/httpbody.
 # protoc-gen-ts
 FROM node:${NODE_VERSION}-alpine${ALPINE_VERSION} as protoc_gen_ts
 ARG PROTOC_GEN_TS_VERSION
+ARG NODE_VERSION
 RUN npm install -g pkg ts-protoc-gen@${PROTOC_GEN_TS_VERSION}
 RUN pkg \
     --compress Brotli \
@@ -186,7 +192,10 @@ RUN install -D protoc-gen-ts /out/usr/bin/protoc-gen-ts
 # upx packing
 FROM --platform=$BUILDPLATFORM alpine_host as upx
 RUN mkdir -p /upx 
-ARG BUILDARCH BUILDOS UPX_VERSION
+ARG BUILDARCH 
+ARG BUILDOS 
+ARG TARGETARCH
+ARG UPX_VERSION
 RUN if ! [ "${TARGETARCH}" = "arm64" ]; then curl -sSL https://github.com/upx/upx/releases/download/v${UPX_VERSION}/upx-${UPX_VERSION}-${BUILDARCH}_${BUILDOS}.tar.xz | tar xJ --strip 1 -C /upx; fi
 RUN if ! [ "${TARGETARCH}" = "arm64" ]; then install -D /upx/upx /usr/local/bin/upx; fi
 COPY --from=googleapis /out/ /out/
@@ -198,7 +207,6 @@ COPY --from=protoc_gen_go_grpc /out/ /out/
 COPY --from=protoc_gen_gogo /out/ /out/
 COPY --from=protoc_gen_validate /out/ /out/
 COPY --from=protoc_gen_php_grpc /out/ /out/
-ARG TARGETARCH
 RUN <<EOF
     if ! [ "${TARGETARCH}" = "arm64" ]; then
         upx --lzma $(find /out/usr/bin/ -type f \
@@ -210,7 +218,7 @@ EOF
 RUN find /out -name "*.a" -delete -or -name "*.la" -delete
 
 
-FROM alpine:${ALPINE_VERSION}
+FROM alpine:edge
 COPY --from=upx /out/ /
 COPY --from=protoc_gen_ts /out/ /
 RUN apk add --no-cache \
@@ -262,16 +270,4 @@ protoc-wrapper \
     google/protobuf/any.proto
 rm -rf /test
 EOF
-# ARG TARGETARCH
-# RUN <<EOF
-#     if ! [ "${TARGETARCH}" = "arm64" ]; then
-#         apk add --no-cache grpc-java
-#         mkdir -p /test
-#         protoc-wrapper \
-#             --java_out=/test \
-#             --grpc-java_out=/test \         
-#             google/protobuf/any.proto
-#         rm -rf /test
-#     fi
-# EOF
 ENTRYPOINT ["protoc-wrapper", "-I/usr/include"]

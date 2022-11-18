@@ -16,12 +16,16 @@ import (
 	"golang.org/x/oauth2"
 )
 
+type repositoryInfo struct {
+	docker_arg, owner, name string
+}
+
 func init() {
 	log.SetFlags(0)
 }
 
-func writeRelease(w io.Writer, owner, name, tag, url string) (int, error) {
-	return fmt.Fprintf(w, "%s/%s\t%s\t%s\n", owner, name, tag, url)
+func writeRelease(w io.Writer, repo repositoryInfo, tag, url string) (int, error) {
+	return fmt.Fprintf(w, "%s\t%s\t%s/%s\t%s\n", repo.docker_arg, tag, repo.owner, repo.name, url)
 }
 
 func main() {
@@ -39,38 +43,15 @@ func main() {
 	cl := github.NewClient(tc)
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
-	fmt.Fprintln(w, "Repository", "\tVersion", "\tRelease page")
+	fmt.Fprintln(w, "Docker ARG", "\tVersion", "\tRepository", "\tRelease page")
 
-	for _, repo := range []struct {
-		owner, name string
-	}{
-		// {"golang", "go"},
-		{"grpc", "grpc"},
-		{"roadrunner-server", "grpc"},
-		{"pseudomuto", "protoc-gen-doc"},
-		{"golang", "protobuf"},
-		{"gogo", "protobuf"},
-		{"protocolbuffers", "protobuf-go"},
-		{"envoyproxy", "protoc-gen-validate"},
-		{"grpc-ecosystem", "grpc-gateway"},
-		{"grpc","grpc-web"},
-		{"improbable-eng", "ts-protoc-gen"},
-		{"upx", "upx"},
-		// {"mwitkow", "go-proto-validators"},
-		// {"ckaznocha", "protoc-gen-lint"},
-		// {"grpc", "grpc-go"},
+	for _, repo := range []repositoryInfo{
+		{"PROTOC_VERSION", "protocolbuffers", "protobuf"},
+		{"GRPC_VERSION", "grpc", "grpc"},
+		{"ROADRUNNER_VERSION", "roadrunner-server", "roadrunner"},
 	} {
 		tag := "n/a"
 		url := "n/a"
-
-		// if repo.owner == "golang" && repo.name == "go" {
-		// 	resp, err := http.Get("https://golang.org/VERSION?m=text")
-
-		// 	if err != nil {
-		// 		log.Printf(resp.Body.Read())
-		// 	}
-		// 	return
-		// }
 
 		rel, _, err := cl.Repositories.GetLatestRelease(ctx, repo.owner, repo.name)
 		if err != nil {
@@ -94,7 +75,7 @@ func main() {
 			url = *rel.HTMLURL
 		}
 
-		if _, err := writeRelease(w, repo.owner, repo.name, tag, url); err != nil {
+		if _, err := writeRelease(w, repo, tag, url); err != nil {
 			log.Printf("Failed to write release %s(%s) of `%s/%s`: %s", err, tag, *rel.HTMLURL, repo.owner, repo.name)
 		}
 	}

@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+
+set -e
+
+TARGET_DIR=/tmp/test
+
+mkdir -p ${TARGET_DIR}
+
+protoc-wrapper \
+  -I/usr/include \
+  --php_out=${TARGET_DIR} \
+  --grpc-php_out=${TARGET_DIR} \
+  --php-grpc_out=${TARGET_DIR} \
+  google/protobuf/any.proto
+
+rm -rf ${TARGET_DIR}

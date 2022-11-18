@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - v2
+      - v3
   schedule:
     - cron: "0 0 * * 0"
   workflow_dispatch:
@@ -45,9 +45,8 @@ jobs:
           platforms: linux/amd64,linux/arm64
           cache-from: |
             type=local,src=/tmp/.buildx-cache
-            keepsuit/protoc:latest
-            keepsuit/protoc:v2
+            keepsuit/protoc:v3
           cache-to: type=local,dest=/tmp/.buildx-cache,mode=all
           push: true
           tags: |
-            keepsuit/protoc:v2
+            keepsuit/protoc:v3

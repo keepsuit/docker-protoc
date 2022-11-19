@@ -11,6 +11,8 @@ protoc-wrapper \
   --php_out=${TARGET_DIR} \
   --grpc-php_out=${TARGET_DIR} \
   --php-grpc_out=${TARGET_DIR} \
+  --js_out=import_style=commonjs,binary:${TARGET_DIR} \
+  --ts_proto_out=${TARGET_DIR} \
   --cpp_out=${TARGET_DIR} \
   --csharp_out=${TARGET_DIR} \
   --java_out=${TARGET_DIR} \

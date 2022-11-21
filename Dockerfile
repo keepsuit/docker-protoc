@@ -109,6 +109,7 @@ COPY --from=protobuf /out/ /
 COPY --from=grpc /out/ /
 COPY --from=roadrunner /out/ /
 COPY --from=protobuf-js /out/ /
+COPY --from=bufbuild/buf /usr/local/bin/buf /usr/local/bin/buf
 COPY protoc-wrapper /usr/local/bin/protoc-wrapper
 COPY protoc-test /usr/local/bin/protoc-test
 RUN /usr/local/bin/protoc-test

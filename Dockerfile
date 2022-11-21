@@ -7,6 +7,7 @@ ARG GRPC_VERSION=1.50.1
 ARG ROADRUNNER_VERSION=2.11.4
 ARG PROTOBUF_JS_VERSION=3.21.2
 ARG TS_PROTO_VERSION=1.131.0
+ARG BUF_VERSION=1.9.0
 
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
@@ -95,6 +96,10 @@ RUN mkdir -p /out/usr/local/bin \
     && chmod a+x /out/usr/local/bin/protoc-gen-js
 
 
+ARG BUF_VERSION
+FROM bufbuild/buf:${BUF_VERSION} as buf
+
+
 FROM ubuntu:${UBUNTU_VERSION}
 RUN apt-get update && apt-get install -y \
     curl
@@ -109,7 +114,7 @@ COPY --from=protobuf /out/ /
 COPY --from=grpc /out/ /
 COPY --from=roadrunner /out/ /
 COPY --from=protobuf-js /out/ /
-COPY --from=bufbuild/buf /usr/local/bin/buf /usr/local/bin/buf
+COPY --from=buf /usr/local/bin/buf /usr/local/bin/buf
 COPY protoc-wrapper /usr/local/bin/protoc-wrapper
 COPY protoc-test /usr/local/bin/protoc-test
 RUN /usr/local/bin/protoc-test

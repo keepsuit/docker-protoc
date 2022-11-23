@@ -49,26 +49,22 @@ func main() {
 		{"PROTOC_VERSION", "protocolbuffers", "protobuf"},
 		{"GRPC_VERSION", "grpc", "grpc"},
 		{"ROADRUNNER_VERSION", "roadrunner-server", "roadrunner"},
+		{"PROTOBUF_JS_VERSION", "protocolbuffers", "protobuf-javascript"},
+		{"BUF_VERSION", "bufbuild", "buf"},
+		{"BUF_PROTOC_ES", "bufbuild", "protobuf-es"},
 	} {
 		tag := "n/a"
 		url := "n/a"
 
 		rel, _, err := cl.Repositories.GetLatestRelease(ctx, repo.owner, repo.name)
 		if err != nil {
-			log.Printf("Failed to query github API for latest release of `%s/%s`: %s, trying tags...", repo.owner, repo.name, err)
-
 			tags, _, err := cl.Repositories.ListTags(ctx, repo.owner, repo.name, &github.ListOptions{
-				PerPage: 10,
+				PerPage: 1,
 			})
 
-			for _, tag := range tags {
-				log.Printf("tag: %s", *tag.Name)
-			}
-
-			if err != nil {
-				log.Printf("Failed to list tags of `%s/%s` on github: %s", repo.owner, repo.name, err)
-			} else if len(tags) > 0 {
+			if err == nil && len(tags) > 0 {
 				tag = *tags[0].Name
+				url = fmt.Sprintf("https://github.com/%s/%s/releases", repo.owner, repo.name)
 			}
 		} else {
 			tag = *rel.TagName

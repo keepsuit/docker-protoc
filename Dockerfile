@@ -6,8 +6,8 @@ ARG PROTOC_VERSION=21.9
 ARG GRPC_VERSION=1.50.1
 ARG ROADRUNNER_VERSION=2.11.4
 ARG PROTOBUF_JS_VERSION=3.21.2
-ARG TS_PROTO_VERSION=1.131.0
 ARG BUF_VERSION=1.9.0
+ARG BUF_PROTOC_ES=0.2.1
 
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
@@ -106,10 +106,10 @@ RUN apt-get update && apt-get install -y \
 ARG NODE_VERSION
 RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
   && apt-get install -y nodejs
-ARG TS_PROTO_VERSION
+ARG BUF_PROTOC_ES
 RUN npm config set unsafe-perm true && npm i -g \
-    ts-proto@$TS_PROTO_VERSION
-RUN ln -s /usr/lib/node_modules/ts-proto/protoc-gen-ts_proto /usr/local/bin/protoc-gen-ts_proto
+    @bufbuild/protoc-gen-es@$BUF_PROTOC_ES
+RUN ln -s /usr/lib/node_modules/@bufbuild/protoc-gen-es/bin/protoc-gen-es /usr/local/bin/protoc-gen-es
 COPY --from=protobuf /out/ /
 COPY --from=grpc /out/ /
 COPY --from=roadrunner /out/ /

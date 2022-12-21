@@ -2,12 +2,12 @@
 
 ARG UBUNTU_VERSION=22.04
 ARG NODE_VERSION=18
-ARG PROTOC_VERSION=21.9
+ARG PROTOC_VERSION=21.12
 ARG GRPC_VERSION=1.50.1
-ARG ROADRUNNER_VERSION=2.11.4
+ARG ROADRUNNER_VERSION=2.12.1
 ARG PROTOBUF_JS_VERSION=3.21.2
-ARG BUF_VERSION=1.9.0
-ARG BUF_PROTOC_ES=0.2.1
+ARG BUF_VERSION=1.11.0
+ARG BUF_PROTOC_ES=1.0.0
 
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
@@ -29,8 +29,8 @@ FROM --platform=$BUILDPLATFORM ubuntu_host as protobuf
 ARG TARGETARCH
 ARG PROTOC_VERSION
 RUN case ${TARGETARCH} in \
-         "amd64")  PROTOC_ARCH=x86_64  ;; \
-         "arm64")  PROTOC_ARCH=aarch_64  ;; \
+    "amd64")  PROTOC_ARCH=x86_64  ;; \
+    "arm64")  PROTOC_ARCH=aarch_64  ;; \
     esac \
     && curl -sSLo /tmp/protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC_VERSION}/protoc-${PROTOC_VERSION}-linux-${PROTOC_ARCH}.zip"
 RUN unzip -q /tmp/protoc.zip -d /tmp/protoc
@@ -86,8 +86,8 @@ FROM --platform=$BUILDPLATFORM ubuntu_host as protobuf-js
 ARG TARGETARCH
 ARG PROTOBUF_JS_VERSION
 RUN case ${TARGETARCH} in \
-         "amd64")  PROTOC_ARCH=x86_64  ;; \
-         "arm64")  PROTOC_ARCH=aarch_64  ;; \
+    "amd64")  PROTOC_ARCH=x86_64  ;; \
+    "arm64")  PROTOC_ARCH=aarch_64  ;; \
     esac \
     && curl -sSLo /tmp/protoc-gen-js.tar.gz "https://github.com/protocolbuffers/protobuf-javascript/releases/download/v${PROTOBUF_JS_VERSION}/protobuf-javascript-${PROTOBUF_JS_VERSION}-linux-${PROTOC_ARCH}.tar.gz"
 RUN tar -xzf /tmp/protoc-gen-js.tar.gz -C /tmp
@@ -105,7 +105,7 @@ RUN apt-get update && apt-get install -y \
     curl
 ARG NODE_VERSION
 RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
-  && apt-get install -y nodejs
+    && apt-get install -y nodejs
 ARG BUF_PROTOC_ES
 RUN npm config set unsafe-perm true && npm i -g \
     @bufbuild/protoc-gen-es@$BUF_PROTOC_ES

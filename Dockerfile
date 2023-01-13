@@ -3,10 +3,10 @@
 ARG UBUNTU_VERSION=22.04
 ARG NODE_VERSION=18
 ARG PROTOC_VERSION=21.12
-ARG GRPC_VERSION=1.50.1
-ARG ROADRUNNER_VERSION=2.12.1
+ARG GRPC_VERSION=1.51.1
+ARG ROADRUNNER_VERSION=2.12.2
 ARG PROTOBUF_JS_VERSION=3.21.2
-ARG BUF_VERSION=1.11.0
+ARG BUF_VERSION=1.12.0
 ARG BUF_PROTOC_ES=1.0.0
 
 
@@ -53,16 +53,15 @@ RUN apt update && apt install -y \
     clang \
     lld
 ARG GRPC_VERSION
-RUN git clone -b v${GRPC_VERSION} https://github.com/grpc/grpc
-WORKDIR grpc
+WORKDIR /tmp/grpc
+RUN git clone -b v${GRPC_VERSION} https://github.com/grpc/grpc .
 RUN git submodule update --init
 ARG TARGETPLATFORM
 RUN xx-apt install -y \
     libc6-dev \
     gcc \
     g++
-RUN mkdir -p cmake/build
-WORKDIR cmake/build
+WORKDIR /tmp/grpc/cmake/build
 RUN cmake $(xx-clang --print-cmake-defines) ../..
 RUN make grpc_php_plugin
 RUN xx-verify grpc_php_plugin

@@ -106,7 +106,7 @@ ARG NODE_VERSION
 RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get install -y nodejs
 ARG BUF_PROTOC_ES
-RUN npm config set unsafe-perm true && npm i -g \
+RUN npm i -g \
     @bufbuild/protoc-gen-es@$BUF_PROTOC_ES
 RUN ln -s /usr/lib/node_modules/@bufbuild/protoc-gen-es/bin/protoc-gen-es /usr/local/bin/protoc-gen-es
 COPY --from=protobuf /out/ /

@@ -1,13 +1,13 @@
 # syntax=docker/dockerfile:1.4
 
 ARG UBUNTU_VERSION=22.04
-ARG NODE_VERSION=18
-ARG PROTOC_VERSION=23.2
-ARG GRPC_VERSION=1.55.1
-ARG ROADRUNNER_VERSION=2023.1.5
+ARG NODE_VERSION=20
+ARG PROTOC_VERSION=24.3
+ARG GRPC_VERSION=1.59.0
+ARG ROADRUNNER_VERSION=2023.2.0
 ARG PROTOBUF_JS_VERSION=3.21.2
-ARG BUF_VERSION=1.21.0
-ARG BUF_PROTOC_ES=1.2.1
+ARG BUF_VERSION=1.26.1
+ARG BUF_PROTOC_ES=1.3.1
 
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx AS xx
@@ -101,9 +101,14 @@ FROM bufbuild/buf:${BUF_VERSION} as buf
 
 FROM ubuntu:${UBUNTU_VERSION}
 RUN apt-get update && apt-get install -y \
-    curl
+    ca-certificates \
+    curl \
+    gnupg
 ARG NODE_VERSION
-RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
+RUN mkdir -p /etc/apt/keyrings \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update -y \
     && apt-get install -y nodejs
 ARG BUF_PROTOC_ES
 RUN npm i -g \

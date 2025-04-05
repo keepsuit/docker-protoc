@@ -3,7 +3,7 @@
 ARG UBUNTU_VERSION=22.04
 ARG NODE_VERSION=22
 ARG PROTOC_VERSION=30.2
-ARG GRPC_VERSION=1.69.0
+ARG GRPC_VERSION=1.71.0
 ARG ROADRUNNER_VERSION=2024.3.5
 ARG PROTOBUF_JS_VERSION=3.21.4
 ARG BUF_VERSION=1.51.0
@@ -62,7 +62,7 @@ RUN xx-apt install -y \
     gcc \
     g++
 WORKDIR /tmp/grpc/cmake/build
-RUN cmake $(xx-clang --print-cmake-defines) ../..
+RUN cmake $(xx-clang --print-cmake-defines) -DCMAKE_CXX_STANDARD=17 ../..
 RUN make grpc_php_plugin
 RUN xx-verify grpc_php_plugin
 RUN mkdir -p /out/usr/local/bin \

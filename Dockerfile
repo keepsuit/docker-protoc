@@ -3,7 +3,7 @@
 ARG UBUNTU_VERSION=22.04
 ARG NODE_VERSION=22
 ARG PROTOC_VERSION=30.2
-ARG GRPC_VERSION=1.71.0
+ARG GRPC_VERSION=1.69.0
 ARG ROADRUNNER_VERSION=2024.3.5
 ARG PROTOBUF_JS_VERSION=3.21.4
 ARG BUF_VERSION=1.51.0
@@ -54,8 +54,8 @@ RUN apt update && apt install -y \
     lld
 ARG GRPC_VERSION
 WORKDIR /tmp/grpc
-RUN git clone -b v${GRPC_VERSION} https://github.com/grpc/grpc .
-RUN git submodule update --init
+RUN git clone -b v${GRPC_VERSION} https://github.com/grpc/grpc . \
+    && git submodule update --init
 ARG TARGETPLATFORM
 RUN xx-apt install -y \
     libc6-dev \
@@ -105,10 +105,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     gnupg
 ARG NODE_VERSION
-RUN mkdir -p /etc/apt/keyrings \
-    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
-    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_VERSION.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
-    && apt-get update -y \
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x -o nodesource_setup.sh \
+    && bash nodesource_setup.sh \
+    && rm -rf nodesource_setup.sh \
     && apt-get install -y nodejs
 ARG BUF_PROTOC_ES
 RUN npm i -g \
